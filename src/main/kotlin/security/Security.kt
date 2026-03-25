@@ -1,0 +1,112 @@
+package org.burgas.security
+
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.csrf.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
+import io.ktor.server.sessions.*
+import kotlinx.serialization.Serializable
+import org.burgas.database.Authority
+import org.burgas.database.DatabaseFactory
+import org.burgas.database.IdentityEntity
+import org.burgas.database.IdentityTable
+import org.burgas.serialization.UUIDSerializer
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.mindrot.jbcrypt.BCrypt
+import java.util.*
+
+@Serializable
+data class ExceptionResponse(
+    val status: String,
+    val code: Int,
+    val message: String
+)
+
+@Serializable
+data class CsrfToken(
+    @Serializable(with = UUIDSerializer::class)
+    val token: UUID
+)
+
+fun Application.configureSecurity() {
+
+    authentication {
+
+        basic(name = "basic-auth-all") {
+            validate { credentials ->
+                val identityEntity = newSuspendedTransaction(db = DatabaseFactory.POSTGRES_REPLICA, readOnly = true) {
+                    IdentityEntity.find { IdentityTable.email eq credentials.name }.singleOrNull()
+                }
+                if (
+                    identityEntity != null && identityEntity.enabled &&
+                    BCrypt.checkpw(credentials.password, identityEntity.password)
+                ) {
+                    UserPasswordCredential(credentials.name, credentials.password)
+                } else {
+                    null
+                }
+            }
+        }
+
+        basic(name = "basic-auth-admin") {
+            validate { credentials ->
+                val identityEntity = newSuspendedTransaction(db = DatabaseFactory.POSTGRES_REPLICA, readOnly = true) {
+                    IdentityEntity.find { IdentityTable.email eq credentials.name }.singleOrNull()
+                }
+                if (
+                    identityEntity != null && identityEntity.enabled && identityEntity.authority == Authority.ADMIN &&
+                    BCrypt.checkpw(credentials.password, identityEntity.password)
+                ) {
+                    UserPasswordCredential(credentials.name, credentials.password)
+                } else {
+                    null
+                }
+            }
+        }
+    }
+
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            val exception = ExceptionResponse(
+                status = HttpStatusCode.BadRequest.description,
+                code = HttpStatusCode.BadRequest.value,
+                message = cause.localizedMessage
+            )
+            call.respond(HttpStatusCode.BadRequest, exception)
+        }
+    }
+
+    install(Sessions) {
+        cookie<CsrfToken>("CSRF_TOKEN")
+    }
+
+    install(CSRF) {
+        allowOrigin("http://localhost:9000")
+        originMatchesHost()
+        checkHeader(HttpHeaders.Host)
+        checkHeader(HttpHeaders.Origin)
+        checkHeader(HttpHeaders.Accept)
+        checkHeader(HttpHeaders.ContentType)
+        checkHeader(HttpHeaders.Authorization)
+        checkHeader("X-CSRF-Token")
+    }
+
+    install(CORS) {
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Patch)
+
+        allowHeader(HttpHeaders.Host)
+        allowHeader(HttpHeaders.Origin)
+        allowHeader(HttpHeaders.Accept)
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader("X-Csrf-Token")
+
+        anyHost()
+    }
+}
