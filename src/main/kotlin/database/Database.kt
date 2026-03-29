@@ -152,7 +152,7 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var firstname by IdentityTable.firstname
     var lastname by IdentityTable.lastname
     var patronymic by IdentityTable.patronymic
-    val image by ImageEntity optionalReferencedOn IdentityTable.imageId
+    var image by ImageEntity optionalReferencedOn IdentityTable.imageId
     val portfolios by PortfolioEntity referrersOn PortfolioTable.identityId
 
     fun insert(identityRequest: IdentityRequest) {
@@ -214,7 +214,7 @@ class ProfessionEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by ProfessionTable.name
     var description by ProfessionTable.description
-    val image by ImageEntity optionalReferencedOn ProfessionTable.imageId
+    var image by ImageEntity optionalReferencedOn ProfessionTable.imageId
     val portfolios by PortfolioEntity optionalReferrersOn PortfolioTable.professionId
 
     fun insert(professionRequest: ProfessionRequest) {
@@ -273,7 +273,7 @@ class PortfolioEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     var name by PortfolioTable.name
     var description by PortfolioTable.description
-    val image by ImageEntity optionalReferencedOn PortfolioTable.imageId
+    var image by ImageEntity optionalReferencedOn PortfolioTable.imageId
     var identity by IdentityEntity referencedOn PortfolioTable.identityId
     var profession by ProfessionEntity optionalReferencedOn PortfolioTable.professionId
     var opened by PortfolioTable.opened
@@ -380,9 +380,9 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var portfolio by PortfolioEntity referencedOn ProjectTable.portfolioId
     var createdAt by ProjectTable.createdAt
     var updatedAt by ProjectTable.updatedAt
-    val images by ImageEntity via ImageTable
-    val videos by VideoEntity via VideoTable
-    val documents by DocumentEntity via DocumentTable
+    var images by ImageEntity via ProjectImageTable
+    var videos by VideoEntity via ProjectVideoTable
+    var documents by DocumentEntity via ProjectDocumentTable
 
     fun insert(projectRequest: ProjectRequest) {
         this.name = projectRequest.name ?: throw IllegalArgumentException("Project name is null")
@@ -408,7 +408,8 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             description = this.description,
             createdAt = this.createdAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
             updatedAt = this.updatedAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
-            portfolio = this.portfolio.toPortfolioShortResponse()
+            portfolio = this.portfolio.toPortfolioShortResponse(),
+            images = this.images.map { it.toImageResponse() }
         )
     }
 
@@ -447,6 +448,8 @@ object ProjectImageTable : Table("project_image") {
         name = "image_id", refColumn = ImageTable.id,
         onDelete = ReferenceOption.CASCADE, onUpdate = ReferenceOption.CASCADE
     )
+    override val primaryKey: PrimaryKey
+        get() = PrimaryKey(arrayOf(projectId, imageId))
 }
 
 object ProjectVideoTable : Table("project_video") {
@@ -458,6 +461,8 @@ object ProjectVideoTable : Table("project_video") {
         name = "video_id", refColumn = VideoTable.id,
         onDelete = ReferenceOption.CASCADE, onUpdate = ReferenceOption.CASCADE
     )
+    override val primaryKey: PrimaryKey
+        get() = PrimaryKey(arrayOf(projectId, videoId))
 }
 
 object ProjectDocumentTable : Table("project_document") {
@@ -469,6 +474,8 @@ object ProjectDocumentTable : Table("project_document") {
         name = "document_id", refColumn = DocumentTable.id,
         onDelete = ReferenceOption.CASCADE, onUpdate = ReferenceOption.CASCADE
     )
+    override val primaryKey: PrimaryKey
+        get() = PrimaryKey(arrayOf(projectId, documentId))
 }
 
 @OptIn(ExperimentalUuidApi::class)

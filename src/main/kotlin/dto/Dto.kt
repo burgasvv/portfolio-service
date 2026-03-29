@@ -187,7 +187,8 @@ data class ProjectShortResponse(
     val description: String? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val portfolio: PortfolioShortResponse? = null
+    val portfolio: PortfolioShortResponse? = null,
+    val images: List<ImageResponse>? = null
 ) : Response
 
 @Serializable
@@ -214,3 +215,8 @@ data class ProjectFullResponse(
     val videos: List<VideoResponse>? = null,
     val documents: List<DocumentResponse>? = null
 ) : Response
+
+@Serializable
+data class FileResponse(
+    val fileIds: List<@Serializable(with = UUIDSerializer::class) UUID>
+)

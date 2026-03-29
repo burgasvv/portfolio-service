@@ -1,5 +1,6 @@
 package org.burgas.service
 
+import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
@@ -16,8 +17,9 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.sql.Connection
 import java.util.*
 
-class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse, ProfessionFullResponse>,
-    RedisHandler<ProfessionEntity> {
+class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse, ProfessionFullResponse>, RedisHandler<ProfessionEntity> {
+
+    private val imageService = ImageService()
 
     override suspend fun findById(id: UUID): ProfessionFullResponse = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_REPLICA, context = Dispatchers.Default, readOnly = true
@@ -75,6 +77,33 @@ class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse
     ) {
         val professionEntity = ProfessionEntity.findById(id) ?: throw IllegalArgumentException("Profession not found")
         professionEntity.delete()
+        handleCache(professionEntity)
+    }
+
+    suspend fun uploadImage(professionId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(
+        db = DatabaseFactory.POSTGRES_MASTER,
+        context = Dispatchers.Default,
+        transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+    ) {
+        val professionEntity = ProfessionEntity.findById(professionId) ?: throw IllegalArgumentException("Profession not found")
+        if (professionEntity.image == null) {
+            val imageEntity = imageService.uploadSingle(multiPartData)
+            professionEntity.apply { this.image = imageEntity }
+            handleCache(professionEntity)
+        } else {
+            throw IllegalArgumentException("Profession image is already set")
+        }
+    }
+
+    suspend fun removeImage(professionId: UUID) = newSuspendedTransaction(
+        db = DatabaseFactory.POSTGRES_MASTER,
+        context = Dispatchers.Default,
+        transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+    ) {
+        val professionEntity = ProfessionEntity.findById(professionId) ?: throw IllegalArgumentException("Profession not found")
+        val imageEntity = professionEntity.image ?: throw IllegalArgumentException("Profession image not found")
+        professionEntity.apply { this.image = null }
+        imageService.removeSingle(imageEntity.id.value)
         handleCache(professionEntity)
     }
 
