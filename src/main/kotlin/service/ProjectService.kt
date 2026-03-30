@@ -5,11 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
 import org.burgas.cache.RedisHandler
-import org.burgas.database.DatabaseFactory
-import org.burgas.database.DocumentEntity
-import org.burgas.database.ImageEntity
-import org.burgas.database.ProjectEntity
-import org.burgas.database.VideoEntity
+import org.burgas.database.*
 import org.burgas.dto.FileResponse
 import org.burgas.dto.ProjectFullResponse
 import org.burgas.dto.ProjectRequest
@@ -101,6 +97,9 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val projectEntity = ProjectEntity.findById(id) ?: throw IllegalArgumentException("Project not found")
+        projectEntity.images.forEach { it.delete() }
+        projectEntity.videos.forEach { it.delete() }
+        projectEntity.documents.forEach { it.delete() }
         projectEntity.delete()
         handleCache(projectEntity)
     }

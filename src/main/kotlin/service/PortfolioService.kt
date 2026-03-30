@@ -94,8 +94,9 @@ class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, P
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val portfolioEntity = PortfolioEntity.findById(id) ?: throw IllegalArgumentException("Portfolio not found")
-        handleCache(portfolioEntity)
+        portfolioEntity.image?.delete()
         portfolioEntity.delete()
+        handleCache(portfolioEntity)
     }
 
     suspend fun uploadImage(portfolioId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(

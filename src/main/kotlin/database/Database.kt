@@ -2,6 +2,7 @@ package org.burgas.database
 
 import io.ktor.server.application.*
 import io.ktor.server.config.*
+import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
 import org.burgas.dto.*
@@ -14,6 +15,7 @@ import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
+import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
@@ -132,10 +134,14 @@ object IdentityTable : UUIDTable("identity") {
     val authority = enumerationByName<Authority>("authority", 250)
     val email = varchar("email", 250).uniqueIndex()
     val password = varchar("password", 250)
+    val phone = varchar("phone", 250)
     val enabled = bool("enabled").default(true)
     val firstname = varchar("firstname", 250)
     val lastname = varchar("lastname", 250)
     val patronymic = varchar("patronymic", 250)
+    val birthdate = date("birthdate")
+    val messengers = text("messengers").nullable()
+    val about = text("about").nullable()
     val imageId = optReference(
         name = "image_id", refColumn = ImageTable.id,
         onDelete = ReferenceOption.SET_NULL, onUpdate = ReferenceOption.CASCADE
@@ -148,10 +154,14 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var authority by IdentityTable.authority
     var email by IdentityTable.email
     var password by IdentityTable.password
+    var phone by IdentityTable.phone
     var enabled by IdentityTable.enabled
     var firstname by IdentityTable.firstname
     var lastname by IdentityTable.lastname
     var patronymic by IdentityTable.patronymic
+    var birthdate by IdentityTable.birthdate
+    var messengers by IdentityTable.messengers
+    var about by IdentityTable.about
     var image by ImageEntity optionalReferencedOn IdentityTable.imageId
     val portfolios by PortfolioEntity referrersOn PortfolioTable.identityId
 
@@ -162,27 +172,39 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             throw IllegalArgumentException("Identity password is null or empty") else BCrypt.hashpw(
             identityRequest.password, BCrypt.gensalt()
         )
+        this.phone = identityRequest.phone ?: throw IllegalArgumentException("Identity phone is null")
         this.enabled = identityRequest.enabled ?: true
         this.firstname = identityRequest.firstname ?: throw IllegalArgumentException("Identity firstname is null")
         this.lastname = identityRequest.lastname ?: throw IllegalArgumentException("Identity lastname is null")
         this.patronymic = identityRequest.patronymic ?: throw IllegalArgumentException("Identity patronymic is null")
+        this.birthdate = identityRequest.birthdate ?: throw IllegalArgumentException("Identity birthdate is null")
+        this.messengers = identityRequest.messengers
+        this.about = identityRequest.about
     }
 
     fun update(identityRequest: IdentityRequest) {
         this.authority = identityRequest.authority ?: this.authority
         this.email = identityRequest.email ?: this.email
+        this.phone = identityRequest.phone ?: this.phone
         this.firstname = identityRequest.firstname ?: this.firstname
         this.lastname = identityRequest.lastname ?: this.lastname
         this.patronymic = identityRequest.patronymic ?: this.patronymic
+        this.birthdate = identityRequest.birthdate ?: this.birthdate
+        this.messengers = identityRequest.messengers ?: this.messengers
+        this.about = identityRequest.about ?: this.about
     }
 
     fun toIdentityShortResponse(): IdentityShortResponse {
         return IdentityShortResponse(
             id = this.id.value,
             email = this.email,
+            phone = this.phone,
             firstname = this.firstname,
             lastname = this.lastname,
             patronymic = this.patronymic,
+            birthdate = this.birthdate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
+            messengers = this.messengers,
+            about = this.about,
             image = this.image?.toImageResponse()
         )
     }
@@ -191,9 +213,13 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         return IdentityFullResponse(
             id = this.id.value,
             email = this.email,
+            phone = this.phone,
             firstname = this.firstname,
             lastname = this.lastname,
             patronymic = this.patronymic,
+            birthdate = this.birthdate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
+            messengers = this.messengers,
+            about = this.about,
             image = this.image?.toImageResponse(),
             portfolios = this.portfolios.map { it.toPortfolioWithoutIdentityResponse() }
         )

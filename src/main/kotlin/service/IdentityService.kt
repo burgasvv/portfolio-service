@@ -78,6 +78,7 @@ class IdentityService : CrudService<IdentityRequest, IdentityShortResponse, Iden
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val identityEntity = IdentityEntity.findById(id) ?: throw IllegalArgumentException("Identity not found")
+        identityEntity.image?.delete()
         identityEntity.delete()
         handleCache(identityEntity)
     }
@@ -122,6 +123,7 @@ class IdentityService : CrudService<IdentityRequest, IdentityShortResponse, Iden
             val imageEntity = imageService.uploadSingle(multiPartData)
             identityEntity.apply { this.image = imageEntity }
             handleCache(identityEntity)
+            identityEntity
         } else {
             throw IllegalArgumentException("Identity image already set")
         }
@@ -137,6 +139,7 @@ class IdentityService : CrudService<IdentityRequest, IdentityShortResponse, Iden
         identityEntity.apply { this.image = null }
         imageService.removeSingle(imageEntity.id.value)
         handleCache(identityEntity)
+        identityEntity
     }
 
     override fun handleCache(entity: IdentityEntity) {

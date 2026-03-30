@@ -1,5 +1,6 @@
 package org.burgas.dto
 
+import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import org.burgas.database.Authority
 import org.burgas.serialization.UUIDSerializer
@@ -45,10 +46,14 @@ data class IdentityRequest(
     val authority: Authority? = null,
     val email: String? = null,
     val password: String? = null,
+    val phone: String? = null,
     val enabled: Boolean? = null,
     val firstname: String? = null,
     val lastname: String? = null,
-    val patronymic: String? = null
+    val patronymic: String? = null,
+    val birthdate: LocalDate? = null,
+    val messengers: String? = null,
+    val about: String? = null
 ) : Request
 
 @Serializable
@@ -56,9 +61,13 @@ data class IdentityShortResponse(
     @Serializable(with = UUIDSerializer::class)
     override val id: UUID? = null,
     val email: String? = null,
+    val phone: String? = null,
     val firstname: String? = null,
     val lastname: String? = null,
     val patronymic: String? = null,
+    val birthdate: String? = null,
+    val messengers: String? = null,
+    val about: String? = null,
     val image: ImageResponse? = null
 ) : Response
 
@@ -67,9 +76,13 @@ data class IdentityFullResponse(
     @Serializable(with = UUIDSerializer::class)
     override val id: UUID? = null,
     val email: String? = null,
+    val phone: String? = null,
     val firstname: String? = null,
     val lastname: String? = null,
     val patronymic: String? = null,
+    val birthdate: String? = null,
+    val messengers: String? = null,
+    val about: String? = null,
     val image: ImageResponse? = null,
     val portfolios: List<PortfolioWithoutIdentityResponse>? = null
 ) : Response

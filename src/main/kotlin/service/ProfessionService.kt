@@ -76,6 +76,7 @@ class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val professionEntity = ProfessionEntity.findById(id) ?: throw IllegalArgumentException("Profession not found")
+        professionEntity.image?.delete()
         professionEntity.delete()
         handleCache(professionEntity)
     }

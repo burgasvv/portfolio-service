@@ -86,11 +86,6 @@ fun Application.configureSecurity() {
     install(CSRF) {
         allowOrigin("http://localhost:9000")
         originMatchesHost()
-        checkHeader(HttpHeaders.Host)
-        checkHeader(HttpHeaders.Origin)
-        checkHeader(HttpHeaders.Accept)
-        checkHeader(HttpHeaders.ContentType)
-        checkHeader(HttpHeaders.Authorization)
         checkHeader("X-CSRF-Token")
     }
 
