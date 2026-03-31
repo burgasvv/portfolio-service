@@ -17,12 +17,15 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentDateTime
 import org.jetbrains.exposed.sql.kotlin.datetime.date
 import org.jetbrains.exposed.sql.kotlin.datetime.datetime
+import org.jetbrains.exposed.sql.statements.api.ExposedBlob
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import redis.clients.jedis.Jedis
+import java.nio.file.Files
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.io.path.Path
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlin.uuid.toJavaUuid
@@ -514,25 +517,64 @@ fun Application.configureDatabase() {
             PortfolioTable, ProjectTable, ProjectImageTable, ProjectVideoTable, ProjectDocumentTable
         )
 
+        val javaDeveloperImageId = Uuid.parse("b3e70333-44be-435e-a1c0-cb68e4893dbc").toJavaUuid()
+        val javaDeveloperImage = ImageEntity.findById(javaDeveloperImageId) ?: ImageEntity.new(javaDeveloperImageId) {
+            this.name = "JavaDeveloper.png"
+            this.contentType = "image/png"
+            this.preview = true
+            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/JavaDeveloper.png")))
+        }
+
+        val frontendDeveloperImageId = Uuid.parse("2132f3f9-0931-40a7-ae16-d68a64b548a5").toJavaUuid()
+        val frontendDeveloperImage = ImageEntity.findById(frontendDeveloperImageId) ?: ImageEntity.new(frontendDeveloperImageId) {
+            this.name = "FrontendDeveloper.jpg"
+            this.contentType = "image/jpg"
+            this.preview = true
+            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/FrontendDeveloper.jpg")))
+        }
+
+        val backendDeveloperImageId = Uuid.parse("78ab646e-1c1f-4af9-bea5-87517b7a77be").toJavaUuid()
+        val backendDeveloperImage = ImageEntity.findById(backendDeveloperImageId) ?: ImageEntity.new(backendDeveloperImageId) {
+            this.name = "BackendDeveloper.png"
+            this.contentType = "image/png"
+            this.preview = true
+            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/BackendDeveloper.png")))
+        }
+
+        val kotlinDeveloperImageId = Uuid.parse("79ed8bf6-f323-45dd-83b8-e209b863d001").toJavaUuid()
+        val kotlinDeveloperImage = ImageEntity.findById(kotlinDeveloperImageId) ?: ImageEntity.new(kotlinDeveloperImageId) {
+            this.name = "KotlinDeveloper.png"
+            this.contentType = "image/png"
+            this.preview = true
+            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/KotlinDeveloper.png")))
+        }
+
         val firstProfessionId = Uuid.parse("622827b6-fdde-4abd-a23a-feb2fb7a0649").toJavaUuid()
         ProfessionEntity.findById(firstProfessionId) ?: ProfessionEntity.new(firstProfessionId) {
             this.name = "Java Developer"
             this.description = "Описание профессии Java Developer"
+            this.image = javaDeveloperImage
         }
+
         val secondProfessionId = Uuid.parse("d87bcb68-b03d-4785-96d9-8a28b2bcd1a4").toJavaUuid()
         ProfessionEntity.findById(secondProfessionId) ?: ProfessionEntity.new(secondProfessionId) {
             this.name = "Frontend Developer"
             this.description = "Описание профессии Frontend Developer"
+            this.image = frontendDeveloperImage
         }
+
         val thirdProfessionId = Uuid.parse("0d10abaf-64ee-49a6-aef4-16d804cb73f2").toJavaUuid()
         ProfessionEntity.findById(thirdProfessionId) ?: ProfessionEntity.new(thirdProfessionId) {
             this.name = "Backend Developer"
             this.description = "Описание профессии Backend Developer"
+            this.image = backendDeveloperImage
         }
+
         val fourthProfessionId = Uuid.parse("21406293-791d-42f5-b38a-44367603a9dd").toJavaUuid()
         ProfessionEntity.findById(fourthProfessionId) ?: ProfessionEntity.new(fourthProfessionId) {
             this.name = "Kotlin Developer"
             this.description = "Описание профессии Kotlin Developer"
+            this.image = kotlinDeveloperImage
         }
     }
 }

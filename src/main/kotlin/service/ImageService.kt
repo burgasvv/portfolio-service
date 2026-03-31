@@ -18,7 +18,12 @@ class ImageService : FileService<ImageEntity>, FileSingle<ImageEntity> {
     override suspend fun findEntity(id: UUID): ImageEntity = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_REPLICA, context = Dispatchers.Default, readOnly = true
     ) {
-        ImageEntity.findById(id) ?: throw IllegalArgumentException("Image not found")
+        val imageEntity = ImageEntity.findById(id) ?: throw IllegalArgumentException("Image not found")
+        if (imageEntity.contentType.startsWith("image")) {
+            imageEntity
+        } else {
+            throw IllegalArgumentException("File is not image")
+        }
     }
 
     @OptIn(InternalAPI::class)

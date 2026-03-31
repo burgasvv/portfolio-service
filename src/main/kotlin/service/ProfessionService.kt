@@ -91,6 +91,7 @@ class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse
             val imageEntity = imageService.uploadSingle(multiPartData)
             professionEntity.apply { this.image = imageEntity }
             handleCache(professionEntity)
+            professionEntity
         } else {
             throw IllegalArgumentException("Profession image is already set")
         }
@@ -106,6 +107,7 @@ class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse
         professionEntity.apply { this.image = null }
         imageService.removeSingle(imageEntity.id.value)
         handleCache(professionEntity)
+        professionEntity
     }
 
     override fun handleCache(entity: ProfessionEntity) {

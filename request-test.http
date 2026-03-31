@@ -90,3 +90,29 @@ Accept: application/json
 Origin: http://localhost:9000
 X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
 Authorization: Basic burgasvv@gmail.com burgasvv
+
+
+
+### Profession Requests
+
+
+
+###
+GET /api/v1/professions
+Host: localhost:9000
+Accept: application/json
+
+###
+GET /api/v1/professions/by-id?professionId=21406293-791d-42f5-b38a-44367603a9dd
+Host: localhost:9000
+Accept: application/json
+
+
+
+### Image Requests
+
+
+
+###
+GET /api/v1/images/by-id?imageId=79ed8bf6-f323-45dd-83b8-e209b863d001
+Host: localhost:9000

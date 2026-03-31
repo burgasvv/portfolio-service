@@ -19,7 +19,12 @@ class DocumentService : FileService<DocumentEntity> {
         context = Dispatchers.Default,
         readOnly = true
     ) {
-        DocumentEntity.findById(id) ?: throw IllegalArgumentException("Document not found")
+        val documentEntity = DocumentEntity.findById(id) ?: throw IllegalArgumentException("Document not found")
+        if (documentEntity.contentType.startsWith("application")) {
+            documentEntity
+        } else {
+            throw IllegalArgumentException("File is not document application")
+        }
     }
 
     @OptIn(InternalAPI::class)

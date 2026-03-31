@@ -19,7 +19,12 @@ class VideoService : FileService<VideoEntity> {
         context = Dispatchers.Default,
         readOnly = true
     ) {
-        VideoEntity.findById(id) ?: throw IllegalArgumentException("Video not found")
+        val videoEntity = VideoEntity.findById(id) ?: throw IllegalArgumentException("Video not found")
+        if (videoEntity.contentType.startsWith("video")) {
+            videoEntity
+        } else {
+            throw IllegalArgumentException("File is not video")
+        }
     }
 
     @OptIn(InternalAPI::class)
