@@ -246,3 +246,33 @@ Accept: application/json
 GET /api/v1/projects
 Host: localhost:9000
 Accept: application/json
+
+###
+POST /api/v1/projects/remove-images?projectId=fc480c19-1cb7-4f74-81e9-d65280bb2c04
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "fileIds": [
+        "2a2a607d-d0db-4eca-99b7-cd23573fef5f"
+    ]
+}
+
+###
+POST /api/v1/projects/remove-documents?projectId=fc480c19-1cb7-4f74-81e9-d65280bb2c04
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "fileIds": [
+        "cc9847fe-44f9-4f24-aec3-857f23288999"
+    ]
+}
