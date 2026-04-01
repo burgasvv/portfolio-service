@@ -52,7 +52,9 @@ data class IdentityRequest(
     val lastname: String? = null,
     val patronymic: String? = null,
     val birthdate: LocalDate? = null,
-    val messengers: String? = null,
+    val telegram: String? = null,
+    val whatsUp: String? = null,
+    val max: String? = null,
     val about: String? = null
 ) : Request
 
@@ -66,7 +68,9 @@ data class IdentityShortResponse(
     val lastname: String? = null,
     val patronymic: String? = null,
     val birthdate: String? = null,
-    val messengers: String? = null,
+    val telegram: String? = null,
+    val whatsUp: String? = null,
+    val max: String? = null,
     val about: String? = null,
     val image: ImageResponse? = null
 ) : Response
@@ -81,7 +85,9 @@ data class IdentityFullResponse(
     val lastname: String? = null,
     val patronymic: String? = null,
     val birthdate: String? = null,
-    val messengers: String? = null,
+    val telegram: String? = null,
+    val whatsUp: String? = null,
+    val max: String? = null,
     val about: String? = null,
     val image: ImageResponse? = null,
     val portfolios: List<PortfolioWithoutIdentityResponse>? = null
@@ -198,10 +204,10 @@ data class ProjectShortResponse(
     override val id: UUID? = null,
     val name: String? = null,
     val description: String? = null,
+    val image: ImageResponse? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
-    val portfolio: PortfolioShortResponse? = null,
-    val images: List<ImageResponse>? = null
+    val portfolio: PortfolioShortResponse? = null
 ) : Response
 
 @Serializable
@@ -210,9 +216,9 @@ data class ProjectWithoutPortfolioResponse(
     override val id: UUID? = null,
     val name: String? = null,
     val description: String? = null,
+    val image: ImageResponse? = null,
     val createdAt: String? = null,
-    val updatedAt: String? = null,
-    val images: List<ImageResponse>? = null
+    val updatedAt: String? = null
 ) : Response
 
 @Serializable
@@ -221,6 +227,7 @@ data class ProjectFullResponse(
     override val id: UUID? = null,
     val name: String? = null,
     val description: String? = null,
+    val image: ImageResponse? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null,
     val portfolio: PortfolioShortResponse? = null,

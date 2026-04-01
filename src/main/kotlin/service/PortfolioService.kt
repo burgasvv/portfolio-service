@@ -1,6 +1,6 @@
 package org.burgas.service
 
-import io.ktor.http.content.MultiPartData
+import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
@@ -109,6 +109,7 @@ class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, P
             val imageEntity = imageService.uploadSingle(multiPartData)
             portfolioEntity.apply { this.image = imageEntity }
             handleCache(portfolioEntity)
+            portfolioEntity
         } else {
             throw IllegalArgumentException("Portfolio image is already set")
         }
@@ -124,6 +125,7 @@ class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, P
         portfolioEntity.apply { this.image = null }
         imageService.removeSingle(imageEntity.id.value)
         handleCache(portfolioEntity)
+        portfolioEntity
     }
 
     override fun handleCache(entity: PortfolioEntity) {

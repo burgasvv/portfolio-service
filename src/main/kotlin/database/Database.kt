@@ -143,7 +143,9 @@ object IdentityTable : UUIDTable("identity") {
     val lastname = varchar("lastname", 250)
     val patronymic = varchar("patronymic", 250)
     val birthdate = date("birthdate")
-    val messengers = text("messengers").nullable()
+    val telegram = varchar("telegram", 250).nullable()
+    val whatsUp = varchar("whats_up", 250).nullable()
+    val max = varchar("max", 250).nullable()
     val about = text("about").nullable()
     val imageId = optReference(
         name = "image_id", refColumn = ImageTable.id,
@@ -163,7 +165,9 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var lastname by IdentityTable.lastname
     var patronymic by IdentityTable.patronymic
     var birthdate by IdentityTable.birthdate
-    var messengers by IdentityTable.messengers
+    var telegram by IdentityTable.telegram
+    var whatsUp by IdentityTable.whatsUp
+    var max by IdentityTable.max
     var about by IdentityTable.about
     var image by ImageEntity optionalReferencedOn IdentityTable.imageId
     val portfolios by PortfolioEntity referrersOn PortfolioTable.identityId
@@ -181,7 +185,9 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         this.lastname = identityRequest.lastname ?: throw IllegalArgumentException("Identity lastname is null")
         this.patronymic = identityRequest.patronymic ?: throw IllegalArgumentException("Identity patronymic is null")
         this.birthdate = identityRequest.birthdate ?: throw IllegalArgumentException("Identity birthdate is null")
-        this.messengers = identityRequest.messengers
+        this.telegram = identityRequest.telegram
+        this.whatsUp = identityRequest.whatsUp
+        this.max = identityRequest.max
         this.about = identityRequest.about
     }
 
@@ -193,7 +199,9 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
         this.lastname = identityRequest.lastname ?: this.lastname
         this.patronymic = identityRequest.patronymic ?: this.patronymic
         this.birthdate = identityRequest.birthdate ?: this.birthdate
-        this.messengers = identityRequest.messengers ?: this.messengers
+        this.telegram = identityRequest.telegram ?: this.telegram
+        this.whatsUp = identityRequest.whatsUp ?: this.whatsUp
+        this.max = identityRequest.max ?: this.max
         this.about = identityRequest.about ?: this.about
     }
 
@@ -206,7 +214,9 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             lastname = this.lastname,
             patronymic = this.patronymic,
             birthdate = this.birthdate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
-            messengers = this.messengers,
+            telegram = this.telegram,
+            whatsUp = this.whatsUp,
+            max = this.max,
             about = this.about,
             image = this.image?.toImageResponse()
         )
@@ -221,7 +231,9 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             lastname = this.lastname,
             patronymic = this.patronymic,
             birthdate = this.birthdate.toJavaLocalDate().format(DateTimeFormatter.ofPattern("dd MMMM yyyy")),
-            messengers = this.messengers,
+            telegram = this.telegram,
+            whatsUp = this.whatsUp,
+            max = this.max,
             about = this.about,
             image = this.image?.toImageResponse(),
             portfolios = this.portfolios.map { it.toPortfolioWithoutIdentityResponse() }
@@ -397,6 +409,10 @@ object ProjectTable : UUIDTable("project") {
         name = "portfolio_id", refColumn = PortfolioTable.id,
         onDelete = ReferenceOption.CASCADE, onUpdate = ReferenceOption.CASCADE
     )
+    val imageId = optReference(
+        name = "image_id", refColumn = ImageTable.id,
+        onDelete = ReferenceOption.SET_NULL, onUpdate = ReferenceOption.CASCADE
+    )
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 }
@@ -407,6 +423,7 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     var name by ProjectTable.name
     var description by ProjectTable.description
     var portfolio by PortfolioEntity referencedOn ProjectTable.portfolioId
+    var image by ImageEntity optionalReferencedOn ProjectTable.imageId
     var createdAt by ProjectTable.createdAt
     var updatedAt by ProjectTable.updatedAt
     var images by ImageEntity via ProjectImageTable
@@ -435,10 +452,10 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             id = this.id.value,
             name = this.name,
             description = this.description,
+            image = this.image?.toImageResponse(),
             createdAt = this.createdAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
             updatedAt = this.updatedAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
-            portfolio = this.portfolio.toPortfolioShortResponse(),
-            images = this.images.map { it.toImageResponse() }
+            portfolio = this.portfolio.toPortfolioShortResponse()
         )
     }
 
@@ -447,9 +464,9 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             id = this.id.value,
             name = this.name,
             description = this.description,
+            image = this.image?.toImageResponse(),
             createdAt = this.createdAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy. hh:mm")),
-            updatedAt = this.updatedAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
-            images = this.images.map { it.toImageResponse() }
+            updatedAt = this.updatedAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm"))
         )
     }
 
@@ -458,6 +475,7 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
             id = this.id.value,
             name = this.name,
             description = this.description,
+            image = this.image?.toImageResponse(),
             createdAt = this.createdAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy. hh:mm")),
             updatedAt = this.updatedAt.toJavaLocalDateTime().format(DateTimeFormatter.ofPattern("dd MMMM yyyy, hh:mm")),
             portfolio = this.portfolio.toPortfolioShortResponse(),
@@ -528,7 +546,7 @@ fun Application.configureDatabase() {
         val frontendDeveloperImageId = Uuid.parse("2132f3f9-0931-40a7-ae16-d68a64b548a5").toJavaUuid()
         val frontendDeveloperImage = ImageEntity.findById(frontendDeveloperImageId) ?: ImageEntity.new(frontendDeveloperImageId) {
             this.name = "FrontendDeveloper.jpg"
-            this.contentType = "image/jpg"
+            this.contentType = "image/jpeg"
             this.preview = true
             this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/FrontendDeveloper.jpg")))
         }

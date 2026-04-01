@@ -5,6 +5,7 @@ import org.burgas.database.configureDatabase
 import org.burgas.routing.configureDocumentRouting
 import org.burgas.routing.configureIdentityRouting
 import org.burgas.routing.configureImageRouting
+import org.burgas.routing.configurePortfolioRouting
 import org.burgas.routing.configureProfessionRouting
 import org.burgas.routing.configureSecurityRouting
 import org.burgas.routing.configureVideoRouting
@@ -26,4 +27,5 @@ fun Application.module() {
     configureDocumentRouting()
     configureIdentityRouting()
     configureProfessionRouting()
+    configurePortfolioRouting()
 }

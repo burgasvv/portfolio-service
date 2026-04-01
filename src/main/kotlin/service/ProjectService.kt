@@ -104,6 +104,37 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         handleCache(projectEntity)
     }
 
+    suspend fun uploadImage(projectId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(
+        db = DatabaseFactory.POSTGRES_MASTER,
+        context = Dispatchers.Default,
+        transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+    ) {
+        val entity = ProjectEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
+        if (entity.image == null) {
+            val imageEntity = imageService.uploadSingle(multiPartData)
+            entity.apply { this.image = imageEntity }
+            entity
+        } else {
+            throw IllegalArgumentException("Project main image already is not null")
+        }
+    }
+
+    suspend fun removeImage(projectId: UUID) = newSuspendedTransaction(
+        db = DatabaseFactory.POSTGRES_MASTER,
+        context = Dispatchers.Default,
+        transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
+    ) {
+        val entity = ProjectEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
+        val imageEntity = entity.image
+        if (imageEntity != null) {
+            entity.apply { this.image = null }
+            imageService.removeSingle(imageEntity.id.value)
+            entity
+        } else {
+            throw IllegalArgumentException("Project image is already null")
+        }
+    }
+
     suspend fun uploadImages(projectId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_MASTER,
         context = Dispatchers.Default,

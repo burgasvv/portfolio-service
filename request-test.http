@@ -12,6 +12,16 @@ Accept: application/json
 
 
 
+### Image Requests
+
+
+
+###
+GET /api/v1/images/by-id?imageId=79ed8bf6-f323-45dd-83b8-e209b863d001
+Host: localhost:9000
+
+
+
 ### Identity Requests
 
 
@@ -33,7 +43,8 @@ X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
     "firstname": "Бургас",
     "lastname": "Вячеслав",
     "patronymic": "Васильевич",
-    "birthdate": "1993-01-10"
+    "birthdate": "1993-01-10",
+    "telegram": "@burgasvv"
 }
 
 ###
@@ -46,8 +57,9 @@ X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
 Authorization: Basic burgasvv@gmail.com burgasvv
 
 {
-    "id": "ecc7ce9c-64c7-4c61-af8f-832719724575",
-    "messengers": "Telegram: @burgasvv, WhatsUp: @burgasvv",
+    "id": "7d3af070-8bc6-4462-be79-3e5d0d45f563",
+    "whatsUp": "@BurgasSlava",
+    "max": "@VyacheslavBurgas",
     "about": "Описание и биография пользователя."
 }
 
@@ -57,7 +69,7 @@ Host: localhost:9000
 Accept: application/json
 
 ###
-GET /api/v1/identities/by-id?identityId=b34a2244-0597-4d26-a0f4-fae3a5be3580
+GET /api/v1/identities/by-id?identityId=7d3af070-8bc6-4462-be79-3e5d0d45f563
 Host: localhost:9000
 Accept: application/json
 
@@ -107,12 +119,85 @@ GET /api/v1/professions/by-id?professionId=21406293-791d-42f5-b38a-44367603a9dd
 Host: localhost:9000
 Accept: application/json
 
+###
+POST /api/v1/professions/create
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "name": "Python Developer",
+    "description": "Описание профессии Python Developer"
+}
+
+###
+POST /api/v1/professions/update
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "id": "4d979140-82ea-4f99-a423-0cf88405bcc0",
+    "description": "Описание профессии Python Developer для тестов"
+}
+
+###
+DELETE /api/v1/professions/delete?professionId=4d979140-82ea-4f99-a423-0cf88405bcc0
+Host: localhost:9000
+Accept: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
 
 
-### Image Requests
+
+### Portfolio Requests
 
 
 
 ###
-GET /api/v1/images/by-id?imageId=79ed8bf6-f323-45dd-83b8-e209b863d001
+POST /api/v1/portfolios/create
 Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "name": "Test-Portfolio Kotlin Developer",
+    "description": "Описание тестового портфолио Kotlin разработчика",
+    "identityId": "7d3af070-8bc6-4462-be79-3e5d0d45f563",
+    "professionId": "21406293-791d-42f5-b38a-44367603a9dd",
+    "opened": true
+}
+
+###
+POST /api/v1/portfolios/update
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
+Authorization: Basic burgasvv@gmail.com burgasvv
+
+{
+    "id": "b12dd843-b5a4-4609-8677-5f9f644f8e7c",
+    "name": "Test-Portfolio of Kotlin-Developer"
+}
+
+###
+GET /api/v1/portfolios
+Host: localhost:9000
+Accept: application/json
+
+###
+GET /api/v1/portfolios/by-id?portfolioId=b12dd843-b5a4-4609-8677-5f9f644f8e7c
+Host: localhost:9000
+Accept: application/json
