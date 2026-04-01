@@ -412,7 +412,7 @@ object ProjectTable : UUIDTable("project") {
     val imageId = optReference(
         name = "image_id", refColumn = ImageTable.id,
         onDelete = ReferenceOption.SET_NULL, onUpdate = ReferenceOption.CASCADE
-    )
+    ).uniqueIndex()
     val createdAt = datetime("created_at").defaultExpression(CurrentDateTime)
     val updatedAt = datetime("updated_at").defaultExpression(CurrentDateTime)
 }

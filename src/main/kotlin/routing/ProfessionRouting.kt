@@ -55,7 +55,8 @@ fun Application.configureProfessionRouting() {
 
                 post("/upload-image") {
                     val professionId = UUID.fromString(call.parameters["professionId"])
-                    val professionEntity = professionService.uploadImage(professionId, call.receiveMultipart())
+                    val professionEntity =
+                        professionService.uploadImage(professionId, call.receiveMultipart(Long.MAX_VALUE))
                     call.respondRedirect("/api/v1/professions/by-id?professionId=${professionEntity.id.value}")
                 }
 

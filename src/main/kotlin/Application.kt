@@ -7,6 +7,7 @@ import org.burgas.routing.configureIdentityRouting
 import org.burgas.routing.configureImageRouting
 import org.burgas.routing.configurePortfolioRouting
 import org.burgas.routing.configureProfessionRouting
+import org.burgas.routing.configureProjectRouting
 import org.burgas.routing.configureSecurityRouting
 import org.burgas.routing.configureVideoRouting
 import org.burgas.security.configureSecurity
@@ -28,4 +29,5 @@ fun Application.module() {
     configureIdentityRouting()
     configureProfessionRouting()
     configurePortfolioRouting()
+    configureProjectRouting()
 }

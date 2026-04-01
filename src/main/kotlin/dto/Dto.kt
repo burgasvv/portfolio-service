@@ -237,6 +237,6 @@ data class ProjectFullResponse(
 ) : Response
 
 @Serializable
-data class FileResponse(
+data class FileRequest(
     val fileIds: List<@Serializable(with = UUIDSerializer::class) UUID>
 )

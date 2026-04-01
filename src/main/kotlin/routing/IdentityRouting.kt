@@ -166,7 +166,7 @@ fun Application.configureIdentityRouting() {
 
                 post("/upload-image") {
                     val identityId = UUID.fromString(call.parameters["identityId"])
-                    val identityEntity = identityService.uploadImage(identityId, call.receiveMultipart())
+                    val identityEntity = identityService.uploadImage(identityId, call.receiveMultipart(Long.MAX_VALUE))
                     call.respondRedirect("/api/v1/identities/by-id?identityId=${identityEntity.id.value}", false)
                 }
 

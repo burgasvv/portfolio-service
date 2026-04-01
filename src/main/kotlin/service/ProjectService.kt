@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
 import org.burgas.cache.RedisHandler
 import org.burgas.database.*
-import org.burgas.dto.FileResponse
+import org.burgas.dto.FileRequest
 import org.burgas.dto.ProjectFullResponse
 import org.burgas.dto.ProjectRequest
 import org.burgas.dto.ProjectShortResponse
@@ -144,18 +144,20 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         val images = imageService.uploadMultiple(multiPartData)
         entity.images = SizedCollection(entity.images + images)
         handleCache(entity)
+        entity
     }
 
-    suspend fun removeImages(projectId: UUID, fileResponse: FileResponse) = newSuspendedTransaction(
+    suspend fun removeImages(projectId: UUID, fileRequest: FileRequest) = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_MASTER,
         context = Dispatchers.Default,
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val entity = ProjectEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
-        val imageEntities = ImageEntity.forIds(fileResponse.fileIds)
+        val imageEntities = ImageEntity.forIds(fileRequest.fileIds)
         entity.images = SizedCollection(entity.images - imageEntities)
         imageEntities.forEach { it.delete() }
         handleCache(entity)
+        entity
     }
 
     suspend fun uploadVideos(projectId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(
@@ -167,18 +169,20 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         val videos = videoService.uploadMultiple(multiPartData)
         entity.videos = SizedCollection(entity.videos + videos)
         handleCache(entity)
+        entity
     }
 
-    suspend fun removeVideos(projectId: UUID, fileResponse: FileResponse) = newSuspendedTransaction(
+    suspend fun removeVideos(projectId: UUID, fileRequest: FileRequest) = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_MASTER,
         context = Dispatchers.Default,
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val entity = ProjectEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
-        val videoEntities = VideoEntity.forIds(fileResponse.fileIds)
+        val videoEntities = VideoEntity.forIds(fileRequest.fileIds)
         entity.videos = SizedCollection(entity.videos - videoEntities)
         videoEntities.forEach { it.delete() }
         handleCache(entity)
+        entity
     }
 
     suspend fun uploadDocuments(projectId: UUID, multiPartData: MultiPartData) = newSuspendedTransaction(
@@ -190,18 +194,20 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         val documents = documentService.uploadMultiple(multiPartData)
         entity.documents = SizedCollection(entity.documents + documents)
         handleCache(entity)
+        entity
     }
 
-    suspend fun removeDocuments(projectId: UUID, fileResponse: FileResponse) = newSuspendedTransaction(
+    suspend fun removeDocuments(projectId: UUID, fileRequest: FileRequest) = newSuspendedTransaction(
         db = DatabaseFactory.POSTGRES_MASTER,
         context = Dispatchers.Default,
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
         val entity = ProjectEntity.findById(projectId) ?: throw IllegalArgumentException("Project not found")
-        val documentEntities = DocumentEntity.forIds(fileResponse.fileIds)
+        val documentEntities = DocumentEntity.forIds(fileRequest.fileIds)
         entity.documents = SizedCollection(entity.documents - documentEntities)
         documentEntities.forEach { it.delete() }
         handleCache(entity)
+        entity
     }
 
     override fun handleCache(entity: ProjectEntity) {

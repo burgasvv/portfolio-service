@@ -143,7 +143,7 @@ fun Application.configurePortfolioRouting() {
 
                 post("/upload-image") {
                     val portfolioId = UUID.fromString(call.parameters["portfolioId"])
-                    val portfolioEntity = portfolioService.uploadImage(portfolioId, call.receiveMultipart())
+                    val portfolioEntity = portfolioService.uploadImage(portfolioId, call.receiveMultipart(Long.MAX_VALUE))
                     call.respondRedirect("/api/v1/portfolios/by-id?portfolioId=${portfolioEntity.id.value}")
                 }
 
