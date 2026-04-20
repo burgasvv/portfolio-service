@@ -4,7 +4,7 @@ import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
-import org.burgas.cache.RedisHandler
+import org.burgas.cache.RedisCacheHandler
 import org.burgas.database.DatabaseFactory
 import org.burgas.database.IdentityEntity
 import org.burgas.dto.IdentityFullResponse
@@ -18,7 +18,7 @@ import org.mindrot.jbcrypt.BCrypt
 import java.sql.Connection
 import java.util.*
 
-class IdentityService : CrudService<IdentityRequest, IdentityShortResponse, IdentityFullResponse>, RedisHandler<IdentityEntity> {
+class IdentityService : CrudService<IdentityRequest, IdentityShortResponse, IdentityFullResponse>, RedisCacheHandler<IdentityEntity> {
 
     private val imageService = ImageService()
 

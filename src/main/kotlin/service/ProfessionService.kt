@@ -4,7 +4,7 @@ import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
-import org.burgas.cache.RedisHandler
+import org.burgas.cache.RedisCacheHandler
 import org.burgas.database.DatabaseFactory
 import org.burgas.database.ProfessionEntity
 import org.burgas.dto.ProfessionFullResponse
@@ -17,7 +17,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.sql.Connection
 import java.util.*
 
-class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse, ProfessionFullResponse>, RedisHandler<ProfessionEntity> {
+class ProfessionService : CrudService<ProfessionRequest, ProfessionShortResponse, ProfessionFullResponse>, RedisCacheHandler<ProfessionEntity> {
 
     private val imageService = ImageService()
 

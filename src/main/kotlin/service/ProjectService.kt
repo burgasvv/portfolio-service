@@ -4,7 +4,7 @@ import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
-import org.burgas.cache.RedisHandler
+import org.burgas.cache.RedisCacheHandler
 import org.burgas.database.*
 import org.burgas.dto.FileRequest
 import org.burgas.dto.ProjectFullResponse
@@ -19,7 +19,7 @@ import java.sql.Connection
 import java.util.*
 
 class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, ProjectFullResponse>,
-    RedisHandler<ProjectEntity> {
+    RedisCacheHandler<ProjectEntity> {
 
     private val imageService = ImageService()
     private val videoService = VideoService()
@@ -60,17 +60,17 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
         context = Dispatchers.Default,
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
-        val projectFullResponse = ProjectEntity.new { this.insert(request) }
+        val project = ProjectEntity.new { this.insert(request) }
             .load(
                 ProjectEntity::portfolio,
                 ProjectEntity::images,
                 ProjectEntity::videos,
                 ProjectEntity::documents
             )
-            .toProjectFullResponse()
-        val projectKey = CacheUtil.PROJECT_KEY.format(projectFullResponse.id)
-        CacheUtil.REDIS.set(projectKey, Json.encodeToString(projectFullResponse))
-        projectFullResponse
+        handleCache(project)
+        val projectKey = CacheUtil.PROJECT_KEY.format(project.id)
+        CacheUtil.REDIS.set(projectKey, Json.encodeToString(project))
+        project.toProjectFullResponse()
     }
 
     override suspend fun update(request: ProjectRequest): ProjectFullResponse = newSuspendedTransaction(

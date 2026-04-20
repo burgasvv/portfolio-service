@@ -1,4 +1,6 @@
 
+@file:Suppress("VulnerableLibrariesLocal")
+
 plugins {
     kotlin("jvm") version "2.3.0"
     id("io.ktor.plugin") version "3.4.1"

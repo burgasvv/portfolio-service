@@ -4,7 +4,7 @@ import io.ktor.http.content.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.json.Json
 import org.burgas.cache.CacheUtil
-import org.burgas.cache.RedisHandler
+import org.burgas.cache.RedisCacheHandler
 import org.burgas.database.DatabaseFactory
 import org.burgas.database.PortfolioEntity
 import org.burgas.dto.PortfolioFullResponse
@@ -18,7 +18,7 @@ import java.sql.Connection
 import java.util.*
 
 class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, PortfolioFullResponse>,
-    RedisHandler<PortfolioEntity> {
+    RedisCacheHandler<PortfolioEntity> {
 
     private val imageService = ImageService()
 
@@ -57,17 +57,17 @@ class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, P
         context = Dispatchers.Default,
         transactionIsolation = Connection.TRANSACTION_READ_COMMITTED
     ) {
-        val portfolioFullResponse = PortfolioEntity.new { this.insert(request) }
+        val portfolio = PortfolioEntity.new { this.insert(request) }
             .load(
                 PortfolioEntity::image,
                 PortfolioEntity::identity,
                 PortfolioEntity::profession,
                 PortfolioEntity::projects
             )
-            .toPortfolioFullResponse()
-        val portfolioKey = CacheUtil.PORTFOLIO_KEY.format(portfolioFullResponse.id)
-        CacheUtil.REDIS.set(portfolioKey, Json.encodeToString(portfolioFullResponse))
-        portfolioFullResponse
+        handleCache(portfolio)
+        val portfolioKey = CacheUtil.PORTFOLIO_KEY.format(portfolio.id)
+        CacheUtil.REDIS.set(portfolioKey, Json.encodeToString(portfolio))
+        portfolio.toPortfolioFullResponse()
     }
 
     override suspend fun update(request: PortfolioRequest): PortfolioFullResponse = newSuspendedTransaction(
