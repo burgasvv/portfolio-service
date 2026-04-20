@@ -5,6 +5,7 @@ import io.ktor.server.config.*
 import kotlinx.datetime.toJavaLocalDate
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toKotlinLocalDateTime
+import org.burgas.cache.RegexUtil
 import org.burgas.dto.*
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.UUIDEntity
@@ -174,34 +175,87 @@ class IdentityEntity(id: EntityID<UUID>) : UUIDEntity(id) {
 
     fun insert(identityRequest: IdentityRequest) {
         this.authority = identityRequest.authority ?: Authority.USER
-        this.email = identityRequest.email ?: throw IllegalArgumentException("Identity email is null")
+        val emailMatcher = RegexUtil.EMAIL.matches(
+            identityRequest.email ?: throw IllegalArgumentException("Identity email is null")
+        )
+        this.email = if (emailMatcher)
+            identityRequest.email
+        else throw IllegalArgumentException("Identity email not matched")
         this.password = if (identityRequest.password.isNullOrEmpty())
             throw IllegalArgumentException("Identity password is null or empty") else BCrypt.hashpw(
             identityRequest.password, BCrypt.gensalt()
         )
-        this.phone = identityRequest.phone ?: throw IllegalArgumentException("Identity phone is null")
+        val phoneMatcher = RegexUtil.PHONE.matches(
+            identityRequest.phone ?: throw IllegalArgumentException("Identity phone is null")
+        )
+        this.phone = if (phoneMatcher)
+            identityRequest.phone
+        else throw IllegalArgumentException("Identity phone not matched")
         this.enabled = identityRequest.enabled ?: true
         this.firstname = identityRequest.firstname ?: throw IllegalArgumentException("Identity firstname is null")
         this.lastname = identityRequest.lastname ?: throw IllegalArgumentException("Identity lastname is null")
         this.patronymic = identityRequest.patronymic ?: throw IllegalArgumentException("Identity patronymic is null")
         this.birthdate = identityRequest.birthdate ?: throw IllegalArgumentException("Identity birthdate is null")
-        this.telegram = identityRequest.telegram
-        this.whatsUp = identityRequest.whatsUp
-        this.max = identityRequest.max
+        if (identityRequest.telegram != null) {
+            val telegramMatcher = RegexUtil.MESSENGER.matches(identityRequest.telegram)
+            this.telegram = if (telegramMatcher)
+                identityRequest.telegram
+            else
+                throw IllegalArgumentException("Identity telegram not matched")
+        }
+        if (identityRequest.whatsUp != null) {
+            val telegramMatcher = RegexUtil.MESSENGER.matches(identityRequest.whatsUp)
+            this.whatsUp = if (telegramMatcher)
+                identityRequest.whatsUp
+            else
+                throw IllegalArgumentException("Identity whatsUp not matched")
+        }
+        if (identityRequest.max != null) {
+            val telegramMatcher = RegexUtil.MESSENGER.matches(identityRequest.max)
+            this.max = if (telegramMatcher)
+                identityRequest.max
+            else
+                throw IllegalArgumentException("Identity max not matched")
+        }
         this.about = identityRequest.about
     }
 
     fun update(identityRequest: IdentityRequest) {
         this.authority = identityRequest.authority ?: this.authority
-        this.email = identityRequest.email ?: this.email
-        this.phone = identityRequest.phone ?: this.phone
+        if (identityRequest.email != null) {
+            val emailMatcher = RegexUtil.EMAIL.matches(identityRequest.email)
+            this.email = if (emailMatcher)
+                identityRequest.email
+            else throw IllegalArgumentException("Identity email not matched")
+        }
+        if (identityRequest.phone != null) {
+            val phoneMatcher = RegexUtil.PHONE.matches(identityRequest.phone)
+            this.phone = if (phoneMatcher)
+                identityRequest.phone
+            else throw IllegalArgumentException("Identity phone not matched")
+        }
         this.firstname = identityRequest.firstname ?: this.firstname
         this.lastname = identityRequest.lastname ?: this.lastname
         this.patronymic = identityRequest.patronymic ?: this.patronymic
         this.birthdate = identityRequest.birthdate ?: this.birthdate
-        this.telegram = identityRequest.telegram ?: this.telegram
-        this.whatsUp = identityRequest.whatsUp ?: this.whatsUp
-        this.max = identityRequest.max ?: this.max
+        if (identityRequest.telegram != null) {
+            val telegramMatcher = RegexUtil.MESSENGER.matches(identityRequest.telegram)
+            this.telegram = if (telegramMatcher)
+                identityRequest.telegram
+            else throw IllegalArgumentException("Identity telegram not matched")
+        }
+        if (identityRequest.whatsUp != null) {
+            val whatsUpMatcher = RegexUtil.MESSENGER.matches(identityRequest.whatsUp)
+            this.whatsUp = if (whatsUpMatcher)
+                identityRequest.whatsUp
+            else throw IllegalArgumentException("Identity whatsUp not matched")
+        }
+        if (identityRequest.max != null) {
+            val maxMatcher = RegexUtil.MESSENGER.matches(identityRequest.max)
+            this.max = if (maxMatcher)
+                identityRequest.max
+            else throw IllegalArgumentException("Identity max not matched")
+        }
         this.about = identityRequest.about ?: this.about
     }
 
@@ -443,7 +497,7 @@ class ProjectEntity(id: EntityID<UUID>) : UUIDEntity(id) {
     fun update(projectRequest: ProjectRequest) {
         this.name = projectRequest.name ?: this.name
         this.description = projectRequest.description ?: this.description
-        this.portfolio = PortfolioEntity.findById(projectRequest.portfolioId ?: UUID(0,0)) ?: this.portfolio
+        this.portfolio = PortfolioEntity.findById(projectRequest.portfolioId ?: UUID(0, 0)) ?: this.portfolio
         this.updatedAt = LocalDateTime.now().toKotlinLocalDateTime()
     }
 
@@ -544,28 +598,31 @@ fun Application.configureDatabase() {
         }
 
         val frontendDeveloperImageId = Uuid.parse("2132f3f9-0931-40a7-ae16-d68a64b548a5").toJavaUuid()
-        val frontendDeveloperImage = ImageEntity.findById(frontendDeveloperImageId) ?: ImageEntity.new(frontendDeveloperImageId) {
-            this.name = "FrontendDeveloper.jpg"
-            this.contentType = "image/jpeg"
-            this.preview = true
-            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/FrontendDeveloper.jpg")))
-        }
+        val frontendDeveloperImage =
+            ImageEntity.findById(frontendDeveloperImageId) ?: ImageEntity.new(frontendDeveloperImageId) {
+                this.name = "FrontendDeveloper.jpg"
+                this.contentType = "image/jpeg"
+                this.preview = true
+                this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/FrontendDeveloper.jpg")))
+            }
 
         val backendDeveloperImageId = Uuid.parse("78ab646e-1c1f-4af9-bea5-87517b7a77be").toJavaUuid()
-        val backendDeveloperImage = ImageEntity.findById(backendDeveloperImageId) ?: ImageEntity.new(backendDeveloperImageId) {
-            this.name = "BackendDeveloper.png"
-            this.contentType = "image/png"
-            this.preview = true
-            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/BackendDeveloper.png")))
-        }
+        val backendDeveloperImage =
+            ImageEntity.findById(backendDeveloperImageId) ?: ImageEntity.new(backendDeveloperImageId) {
+                this.name = "BackendDeveloper.png"
+                this.contentType = "image/png"
+                this.preview = true
+                this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/BackendDeveloper.png")))
+            }
 
         val kotlinDeveloperImageId = Uuid.parse("79ed8bf6-f323-45dd-83b8-e209b863d001").toJavaUuid()
-        val kotlinDeveloperImage = ImageEntity.findById(kotlinDeveloperImageId) ?: ImageEntity.new(kotlinDeveloperImageId) {
-            this.name = "KotlinDeveloper.png"
-            this.contentType = "image/png"
-            this.preview = true
-            this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/KotlinDeveloper.png")))
-        }
+        val kotlinDeveloperImage =
+            ImageEntity.findById(kotlinDeveloperImageId) ?: ImageEntity.new(kotlinDeveloperImageId) {
+                this.name = "KotlinDeveloper.png"
+                this.contentType = "image/png"
+                this.preview = true
+                this.data = ExposedBlob(Files.readAllBytes(Path("src/main/resources/images/KotlinDeveloper.png")))
+            }
 
         val firstProfessionId = Uuid.parse("622827b6-fdde-4abd-a23a-feb2fb7a0649").toJavaUuid()
         ProfessionEntity.findById(firstProfessionId) ?: ProfessionEntity.new(firstProfessionId) {

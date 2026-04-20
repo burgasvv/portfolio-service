@@ -48,6 +48,27 @@ X-Csrf-Token: 7826d2b0-5700-4bab-8a01-5febef3a3f1e
 }
 
 ###
+POST /api/v1/identities/create
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 67182b52-69a5-4bf4-9624-3852c562748b
+
+{
+    "authority": "USER",
+    "email": "zagor@gmail.com",
+    "phone": "+79563214589",
+    "password": "zagor",
+    "enabled": true,
+    "firstname": "Загорулько",
+    "lastname": "Борис",
+    "patronymic": "Юрьевич",
+    "birthdate": "1993-10-30",
+    "telegram": "@zagor"
+}
+
+###
 POST /api/v1/identities/update
 Host: localhost:9000
 Accept: application/json
@@ -60,6 +81,22 @@ Authorization: Basic burgasvv@gmail.com burgasvv
     "id": "7d3af070-8bc6-4462-be79-3e5d0d45f563",
     "whatsUp": "@BurgasSlava",
     "max": "@VyacheslavBurgas",
+    "about": "Описание и биография пользователя."
+}
+
+###
+POST /api/v1/identities/update
+Host: localhost:9000
+Accept: application/json
+Content-Type: application/json
+Origin: http://localhost:9000
+X-Csrf-Token: 67182b52-69a5-4bf4-9624-3852c562748b
+Authorization: Basic zagor@gmail.com zagor
+
+{
+    "id": "24b2c975-3f6f-4ea9-a416-bc4c5a1f56e9",
+    "whatsUp": "@ZagorBoris",
+    "max": "@ZagorulkoBoris",
     "about": "Описание и биография пользователя."
 }
 
