@@ -65,9 +65,10 @@ class PortfolioService : CrudService<PortfolioRequest, PortfolioShortResponse, P
                 PortfolioEntity::projects
             )
         handleCache(portfolio)
+        val portfolioFullResponse = portfolio.toPortfolioFullResponse()
         val portfolioKey = CacheUtil.PORTFOLIO_KEY.format(portfolio.id)
-        CacheUtil.REDIS.set(portfolioKey, Json.encodeToString(portfolio))
-        portfolio.toPortfolioFullResponse()
+        CacheUtil.REDIS.set(portfolioKey, Json.encodeToString(portfolioFullResponse))
+        portfolioFullResponse
     }
 
     override suspend fun update(request: PortfolioRequest): PortfolioFullResponse = newSuspendedTransaction(

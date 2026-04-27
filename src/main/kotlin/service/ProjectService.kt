@@ -68,9 +68,10 @@ class ProjectService : CrudService<ProjectRequest, ProjectShortResponse, Project
                 ProjectEntity::documents
             )
         handleCache(project)
+        val projectFullResponse = project.toProjectFullResponse()
         val projectKey = CacheUtil.PROJECT_KEY.format(project.id)
-        CacheUtil.REDIS.set(projectKey, Json.encodeToString(project))
-        project.toProjectFullResponse()
+        CacheUtil.REDIS.set(projectKey, Json.encodeToString(projectFullResponse))
+        projectFullResponse
     }
 
     override suspend fun update(request: ProjectRequest): ProjectFullResponse = newSuspendedTransaction(
